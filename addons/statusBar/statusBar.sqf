@@ -70,8 +70,17 @@ disableSerialization;
 		_energyPercent = 100;
 		_serverFPS = round diag_fps;
 		_pos = getPosATL player;
-		_dir = round (getDir (vehicle player));
-		_grid = mapGridPosition  player; _xx = (format[_grid]) select  [0,3]; 
+		_mags = assignedItems player;
+		_dir = -1;
+		if ("ItemCompass" in _mags) then {
+			_dir = round (getDir (vehicle player));
+		};
+		_hasGps = false;
+		if ("ItemGPS" in _mags) then {
+			_hasGps = true;
+		};
+		_grid = mapGridPosition  player;
+		_xx = (format[_grid]) select  [0,3];
 		_yy = (format[_grid]) select  [3,3];  
 		_time = (round(240-(serverTime)/60));  //edit the '240' value (60*4=240) to change the countdown timer if your server restarts are shorter or longer than 4 hour intervals
 		_hours = (floor(_time/60));
@@ -166,39 +175,53 @@ disableSerialization;
 		
 		//Stamina
 		_colourStamina = _colourDefault;
+
+		//has a Compass ?
+		_compass = "";
+		if (_dir != -1) then {
+			_compass = format["
+			<t shadow='1' shadowColor='#000000' color='%1'>	<img size='1.0'  shadowColor='#000000' image='addons\statusbar\icons\compass.paa' color='%1'/> %2</t>",
+			 _colourDefault, _dir];
+		};
+		_gps = "";
+		if (_hasGps) then {
+			_gps = format["
+			<t shadow='1' shadowColor='#000000' color='%1'>	<img size='1.0'  shadowColor='#000000' image='addons\statusbar\icons\gps.paa' color='%1'/> %2</t>",
+			 _colourDefault, format["%1/%2",_xx,_yy]];
+		};
 		
 		//display the information 
 		((uiNamespace getVariable "osefStatusBarAdmin")displayCtrl 55554)ctrlSetStructuredText parseText 
 			format["
 			<t shadow='1' shadowColor='#000000' color='%10'><img size='1.6'  shadowColor='#000000' image='addons\statusbar\icons\players.paa' color='%10'/> %2</t>
 			<t shadow='1' shadowColor='#000000' color='%11'><img size='1.0'  shadowColor='#000000' image='addons\statusbar\icons\health.paa' color='%11'/> %3%1</t> 
-			<t shadow='1' shadowColor='#000000' color='%10'><img size='1.0'  shadowColor='#000000' image='addons\statusbar\icons\poptab_ca.paa' color='%10'/> %4</t> 
-			<t shadow='1' shadowColor='#000000' color='%12'><img size='1.6'  shadowColor='#000000' image='addons\statusbar\icons\hunger.paa' color='%12'/> %5%1</t> 
-			<t shadow='1' shadowColor='#000000' color='%13'><img size='1.6'  shadowColor='#000000' image='addons\statusbar\icons\thirst.paa' color='%13'/> %6%1</t> 
-			<t shadow='1' shadowColor='#000000' color='%15'><img size='1.0'  shadowColor='#000000' image='addons\statusbar\icons\exile.paa' color='%10'/> %9</t> 
+			<t shadow='1' shadowColor='#000000' color='%10'><img size='1.0'  shadowColor='#000000' image='addons\statusbar\icons\poptab_ca.paa' color='%10'/> %4</t>
 			<t shadow='1' shadowColor='#000000' color='%10'>FPS: %7</t>
-			<t shadow='1' shadowColor='#000000' color='%15'><img size='1.0'  shadowColor='#000000' image='addons\statusbar\icons\compass.paa' color='%10'/> %17</t> 
-			<t shadow='1' shadowColor='#000000' color='%10'><img size='1.6'  shadowColor='#000000' image='addons\statusbar\icons\restart.paa' color='%10'/>%18:%19</t>",
+			%20
+			%21
+			",
 			
-					"%", 
+					"%",
 					count playableUnits,
 					_damage,
-					_wallet, 
-					_hunger, 
-					_thirst, 
-					_serverFPS, 
-					_energyPercent, 
-					_stamina, 
+					_wallet,
+					_hunger,
+					_thirst,
+					_serverFPS,
+					_energyPercent,
+					_stamina,
 					_colourDefault,
 					_colourDamage,
 					_colourHunger,
 					_colourThirst,
 					_colourEnergy,
 					_colourStamina,
-					format["%1/%2",_xx,_yy], 
+					format["%1/%2",_xx,_yy],
 					_dir,
 					_hours,
-					_minutes					 
+					_minutes,
+					_compass,
+					_gps
 				];
 		
 		}; 
